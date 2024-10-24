@@ -56,12 +56,12 @@ module ViewExamples = {
 }
 
 module MarginPadding = {
-  type inputState = Default | Changed | Focused
+
 
   type inputValue = {
     value: string,
     metric: string,
-    state: inputState,
+      state: string,
   }
 
   type dimensions = {
@@ -74,10 +74,10 @@ module MarginPadding = {
   @react.component
   let make = () => {
     let initialDimensions = {
-      top: {value: "", metric: "px", state: Default},
-      right: {value: "", metric: "px", state: Default},
-      bottom: {value: "", metric: "px", state: Default},
-      left: {value: "", metric: "px", state: Default},
+      top: {value: "", metric: "px", state: "default"},
+      right: {value: "", metric: "px", state: "default"},
+      bottom: {value: "", metric: "px", state: "default"},
+      left: {value: "", metric: "px", state: "default"},
     }
 
     let (margins, setMargins) = React.useState(_ => initialDimensions)
@@ -88,18 +88,11 @@ module MarginPadding = {
       Js.Dict.fromArray([
         ("value", Js.Json.string(inputValue.value)),
         ("metric", Js.Json.string(inputValue.metric)),
-        ("state", Js.Json.string(
-          switch inputValue.state {
-          | Default => "default"
-          | Changed => "changed"
-          | Focused => "focused"
-          }
-        ))
-      ])
-    )
+        ("state", Js.Json.string(inputValue.state))
+        ]))
   }
 
-    let createStylePayload = (elementId) => {
+    let createStylePayload = (elementId, isMargin, side, newValue, newMetric, newState) => {
   // Create the payload object using Js.Dict for a cleaner approach
   let payload = Js.Dict.empty()
   Js.Dict.set(payload, "elementId", Js.Json.string(elementId))
@@ -115,6 +108,9 @@ module MarginPadding = {
   Js.Dict.set(paddingDict, "right", createSideStyleObject(padding.right))
   Js.Dict.set(paddingDict, "bottom", createSideStyleObject(padding.bottom))
   Js.Dict.set(paddingDict, "left", createSideStyleObject(padding.left))
+
+// Realtime Update
+  Js.Dict.set(isMargin ? marginDict : paddingDict, side, createSideStyleObject({value: newValue, metric: newMetric, state: newState}))
 
   Js.Dict.set(payload, "margin", Js.Json.object_(marginDict))
   Js.Dict.set(payload, "padding", Js.Json.object_(paddingDict))
@@ -133,10 +129,7 @@ module MarginPadding = {
         }
       })
 
-      let payload = createStylePayload("exampleElementId")
-      // TODO: Ensure the latest state is sent to the backend
-      // let style = Js.Dict.get(payload, isMargin ? "margin" : "padding")
-      // Js.Dict.set(style, side, createSideStyleObject({value: newValue, metric: newMetric, state: newState}))
+      let payload = createStylePayload("exampleElementId", isMargin, side, newValue, newMetric, newState)
       let headers = Js.Dict.empty()
       Js.Dict.set(headers, "Content-Type", "application/json")
 
@@ -171,9 +164,9 @@ module MarginPadding = {
 
     let renderInput = (setter, side, {value, metric, state}) => {
       let inputClassName = switch state {
-      | Default => "input-default"
-      | Changed => "input-changed"
-      | Focused => "input-focused"
+      | "changed" => "input-changed"
+      | "focused" => "input-focused"
+      | _ => "input-default"
       }
 
       <div className="input-group">
@@ -182,11 +175,11 @@ module MarginPadding = {
           value
           className={`dimension-input ${inputClassName}`}
           placeholder="auto"
-          onFocus={_ => updateDimension(setter, side, value, metric, Focused)}
-          onBlur={_ => updateDimension(setter, side, value, metric, if value !== "" {Changed} else {Default})}
+          onFocus={_ => updateDimension(setter, side, value, metric, "focused")}
+          onBlur={_ => updateDimension(setter, side, value, metric, if value !== "" { "changed" } else { "default" })}
           onChange={e => {
             let newValue = ReactEvent.Form.target(e)["value"]
-            updateDimension(setter, side, newValue, metric, Focused)
+            updateDimension(setter, side, newValue, metric, "focused")
           }}
         />
         <select
@@ -194,7 +187,7 @@ module MarginPadding = {
           value={metric}
           onChange={e => {
             let newMetric = ReactEvent.Form.target(e)["value"] === "px" ? "px" : "%"
-            updateDimension(setter, side, value, newMetric, if value !== "" {Changed} else {Default})
+            updateDimension(setter, side, value, newMetric, if value !== "" { "changed" } else { "default" })
           }}>
           <option value="px"> {React.string("px")} </option>
           <option value="%"> {React.string("%")} </option>
