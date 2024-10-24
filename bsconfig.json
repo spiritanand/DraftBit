@@ -16,11 +16,11 @@
   ],
   "suffix": ".bs.js",
   "namespace": true,
-  "bs-dependencies": [ "@rescript/react" ],
-  "bs-dev-dependencies":[ ],
+  "bs-dependencies": ["@rescript/react"],
+  "bs-dev-dependencies": [],
   "ppx-flags": [],
   "refmt": 3,
-"gentypeconfig": {
+  "gentypeconfig": {
     "language": "typescript",
     "shims": {},
     "generatedFileExtension": ".gen.tsx",
@@ -29,5 +29,5 @@
       "all": false,
       "basic": false
     }
-}
+  }
 }

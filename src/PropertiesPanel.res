@@ -84,7 +84,46 @@ module MarginPadding = {
     let (margins, setMargins) = React.useState(_ => initialDimensions)
     let (padding, setPadding) = React.useState(_ => initialDimensions)
 
-    let updateDimension = (setter, side, newValue, newMetric, newState) => {
+    let createSideStyleObject = (inputValue) => {
+    Js.Json.object_(
+      Js.Dict.fromArray([
+        ("value", Js.Json.string(inputValue.value)),
+        ("metric", Js.Json.string(inputValue.metric == Px ? "px" : "%")),
+        ("state", Js.Json.string(
+          switch inputValue.state {
+          | Default => "default"
+          | Changed => "changed"
+          | Focused => "focused"
+          }
+        ))
+      ])
+    )
+  }
+
+    let createStylePayload = (elementId) => {
+  // Create the payload object using Js.Dict for a cleaner approach
+  let payload = Js.Dict.empty()
+  Js.Dict.set(payload, "elementId", Js.Json.string(elementId))
+  let marginDict = Js.Dict.empty()
+  let paddingDict = Js.Dict.empty()
+  
+  Js.Dict.set(marginDict, "top", createSideStyleObject(margins.top))
+  Js.Dict.set(marginDict, "right", createSideStyleObject(margins.right))
+  Js.Dict.set(marginDict, "bottom", createSideStyleObject(margins.bottom))
+  Js.Dict.set(marginDict, "left", createSideStyleObject(margins.left))
+
+  Js.Dict.set(paddingDict, "top", createSideStyleObject(padding.top))
+  Js.Dict.set(paddingDict, "right", createSideStyleObject(padding.right))
+  Js.Dict.set(paddingDict, "bottom", createSideStyleObject(padding.bottom))
+  Js.Dict.set(paddingDict, "left", createSideStyleObject(padding.left))
+
+  Js.Dict.set(payload, "margin", Js.Json.object_(marginDict))
+  Js.Dict.set(payload, "padding", Js.Json.object_(paddingDict))
+  payload
+  }
+
+    let updateDimension = (isMargin, side, newValue, newMetric, newState) => {
+      let setter = isMargin ? setMargins : setPadding
       setter(prevDimensions => {
         switch side {
         | "top" => {...prevDimensions, top: {value: newValue, metric: newMetric, state: newState}}
@@ -94,6 +133,13 @@ module MarginPadding = {
         | _ => prevDimensions
         }
       })
+
+      let payload = createStylePayload("exampleElementId")
+      let headers = Js.Dict.empty()
+      Js.Dict.set(headers, "Content-Type", "application/json")
+
+      Fetch.fetchJsonPost(`http://localhost:12346/styles/update`, ~body=Some(Js.Json.stringify(Js.Json.object_(payload))), ~headers=headers)
+      |> ignore
     }
 
     let renderInput = (setter, side, {value, metric, state}) => {
@@ -131,21 +177,21 @@ module MarginPadding = {
 
     <div className="margin-padding-container">
       <div className="margin-padding-inner">
-        <div className="margin-top">{renderInput(setMargins, "top", margins.top)}</div>
+        <div className="margin-top">{renderInput(true, "top", margins.top)}</div>
         <div className="margin-horizontal">
-          <div className="margin-left">{renderInput(setMargins, "left", margins.left)}</div>
+          <div className="margin-left">{renderInput(true, "left", margins.left)}</div>
           <div className="content-area">
-            <div className="padding-top">{renderInput(setPadding, "top", padding.top)}</div>
+            <div className="padding-top">{renderInput(false, "top", padding.top)}</div>
             <div className="padding-horizontal">
-              <div className="padding-left">{renderInput(setPadding, "left", padding.left)}</div>
+              <div className="padding-left">{renderInput(false, "left", padding.left)}</div>
               <div className="inner-content">{"Content"->React.string}</div>
-              <div className="padding-right">{renderInput(setPadding, "right", padding.right)}</div>
+              <div className="padding-right">{renderInput(false, "right", padding.right)}</div>
             </div>
-            <div className="padding-bottom">{renderInput(setPadding, "bottom", padding.bottom)}</div>
+            <div className="padding-bottom">{renderInput(false, "bottom", padding.bottom)}</div>
           </div>
-          <div className="margin-right">{renderInput(setMargins, "right", margins.right)}</div>
+          <div className="margin-right">{renderInput(true, "right", margins.right)}</div>
         </div>
-        <div className="margin-bottom">{renderInput(setMargins, "bottom", margins.bottom)}</div>
+        <div className="margin-bottom">{renderInput(true, "bottom", margins.bottom)}</div>
       </div>
     </div>
   }
