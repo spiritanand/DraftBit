@@ -22,22 +22,21 @@ const setupApp = (): express.Application => {
   app.get("/styles/margin/:elementId", async (req, res) => {
     const { elementId } = req.params;
 
-    console.log({ elementId });
-    const styles = await db
-      .select()
-      .from(elementStyles)
-      .where(eq(elementStyles.elementId, elementId));
+    const styles = await db.select().from(margins).where(eq(margins.id, elementId));
 
-    if (styles.length === 0) res.status(404).json({ error: "Styles not found" });
+    if (styles.length === 0) res.status(404).json({ error: "Margin not found" });
 
-    // const margin = {
-    //   top: { value: styles[0].marginTop, metric: , state: "default" },
-    //   right: { value: styles[0].marginRight, metric: "px", state: "default" },
-    //   bottom: { value: styles[0].marginBottom, metric: "px", state: "default" },
-    //   left: { value: styles[0].marginLeft, metric: "px", state: "default" },
-    // };
+    res.json(styles[0]);
+  });
 
-    res.json(styles);
+  app.get("/styles/padding/:elementId", async (req, res) => {
+    const { elementId } = req.params;
+
+    const styles = await db.select().from(paddings).where(eq(paddings.id, elementId));
+
+    if (styles.length === 0) res.status(404).json({ error: "Padding not found" });
+
+    res.json(styles[0]);
   });
 
   app.post("/styles/update", async (req, res) => {

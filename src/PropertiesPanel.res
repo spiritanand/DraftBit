@@ -135,12 +135,34 @@ module MarginPadding = {
       })
 
       let payload = createStylePayload("exampleElementId")
+      // TODO: Ensure the latest state is sent to the backend
+      // let style = Js.Dict.get(payload, isMargin ? "margin" : "padding")
+      // Js.Dict.set(style, side, createSideStyleObject({value: newValue, metric: newMetric, state: newState}))
       let headers = Js.Dict.empty()
       Js.Dict.set(headers, "Content-Type", "application/json")
 
       Fetch.fetchJsonPost(`http://localhost:12346/styles/update`, ~body=Some(Js.Json.stringify(Js.Json.object_(payload))), ~headers=headers)
       |> ignore
     }
+
+     React.useEffect1(() => {
+      Fetch.fetchJson(`http://localhost:12346/styles/margin/exampleElementId`)
+      |> Js.Promise.then_(marginJson => {
+        Js.Promise.resolve(setMargins(_ =>(Obj.magic(marginJson))))
+      })
+      |> ignore
+      None
+    }, [setMargins])
+
+         React.useEffect1(() => {
+      Fetch.fetchJson(`http://localhost:12346/styles/padding/exampleElementId`)
+      |> Js.Promise.then_(paddingJson => {
+        Js.Promise.resolve(setPadding(_ =>(Obj.magic(paddingJson))))
+      })
+      |> ignore
+      None
+    }, [setPadding])
+
 
     let renderInput = (setter, side, {value, metric, state}) => {
       let inputClassName = switch state {
