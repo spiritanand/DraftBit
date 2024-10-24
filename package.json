@@ -12,9 +12,10 @@
     "@types/react": "^18.3.12",
     "@types/react-dom": "^17.0.0",
     "cors": "^2.8.5",
+    "drizzle-orm": "^0.35.3",
     "exponential-backoff": "^3.1.0",
     "express": "^4.18.1",
-    "pg": "^8.8.0",
+    "pg": "^8.13.0",
     "react": "^18.3.1",
     "react-dom": "^17.0.2",
     "react-scripts": "4.0.3",
@@ -34,7 +35,9 @@
     "backend:server": "nodemon dev.js",
     "backend:build-docker": "docker build -t code-challenge .",
     "backend:psql": "psql postgres://$(dotenv -p PGUSER):$(dotenv -p PGPASSWORD)@$(dotenv -p PGHOST):$(dotenv -p PGPORT)/$(dotenv -p PGDATABASE)",
-    "backend:db": "yarn backend:build-docker && docker run --rm --name draftbit-challenge -e POSTGRES_PASSWORD=$(dotenv -p PGPASSWORD) -p $(dotenv -p PGPORT):5432 code-challenge"
+    "backend:db": "yarn backend:build-docker && docker run --rm --name draftbit-challenge -e POSTGRES_PASSWORD=$(dotenv -p PGPASSWORD) -p $(dotenv -p PGPORT):5432 code-challenge",
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio"
   },
   "eslintConfig": {
     "extends": [
@@ -59,14 +62,16 @@
     "@babel/preset-typescript": "^7.18.6",
     "@babel/register": "^7.18.9",
     "@types/express": "^4.17.13",
-    "@types/pg": "^8.6.5",
+    "@types/pg": "^8.11.10",
     "concurrently": "^7.3.0",
-    "dotenv": "^16.0.2",
+    "dotenv": "^16.4.5",
     "dotenv-cli": "^6.0.0",
+    "drizzle-kit": "^0.26.2",
     "gentype": "^4.2.0",
     "nodemon": "^2.0.19",
     "prettier": "^2.7.1",
-    "rescript": "^9.1.4"
+    "rescript": "^9.1.4",
+    "tsx": "^4.19.1"
   },
   "packageManager": "yarn@1.22.22+sha1.ac34549e6aa8e7ead463a7407e1c7390f61a6610"
 }
