@@ -2,7 +2,7 @@ import { z } from "zod";
 
 const dimensionSchema = z.object({
   value: z.union([z.literal(""), z.coerce.number()]),
-  metric: z.enum(["px", "%"]),
+  metric: z.enum(["px", "%"]).default("px"),
   state: z.enum(["default", "changed", "focused"]).default("default"),
 });
 export type Dimension = z.infer<typeof dimensionSchema>;

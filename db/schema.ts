@@ -21,10 +21,10 @@ export const paddings = pgTable("padding", {
 export const elementStyles = pgTable("element_style", {
   elementId: varchar({ length: 255 }).primaryKey(),
   marginId: varchar({ length: 255 })
-    .references(() => margins.id)
+    .references(() => margins.id, { onDelete: "cascade" })
     .notNull(),
   paddingId: varchar({ length: 255 })
-    .references(() => paddings.id)
+    .references(() => paddings.id, { onDelete: "cascade" })
     .notNull(),
   createdAt: timestamp().defaultNow(),
 });

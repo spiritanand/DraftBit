@@ -56,12 +56,11 @@ module ViewExamples = {
 }
 
 module MarginPadding = {
-  type metric = Px | Percent
   type inputState = Default | Changed | Focused
 
   type inputValue = {
     value: string,
-    metric: metric,
+    metric: string,
     state: inputState,
   }
 
@@ -75,10 +74,10 @@ module MarginPadding = {
   @react.component
   let make = () => {
     let initialDimensions = {
-      top: {value: "", metric: Px, state: Default},
-      right: {value: "", metric: Px, state: Default},
-      bottom: {value: "", metric: Px, state: Default},
-      left: {value: "", metric: Px, state: Default},
+      top: {value: "", metric: "px", state: Default},
+      right: {value: "", metric: "px", state: Default},
+      bottom: {value: "", metric: "px", state: Default},
+      left: {value: "", metric: "px", state: Default},
     }
 
     let (margins, setMargins) = React.useState(_ => initialDimensions)
@@ -88,7 +87,7 @@ module MarginPadding = {
     Js.Json.object_(
       Js.Dict.fromArray([
         ("value", Js.Json.string(inputValue.value)),
-        ("metric", Js.Json.string(inputValue.metric == Px ? "px" : "%")),
+        ("metric", Js.Json.string(inputValue.metric)),
         ("state", Js.Json.string(
           switch inputValue.state {
           | Default => "default"
@@ -150,6 +149,9 @@ module MarginPadding = {
       |> Js.Promise.then_(marginJson => {
         Js.Promise.resolve(setMargins(_ =>(Obj.magic(marginJson))))
       })
+      |> Js.Promise.catch(_ => {
+        Js.Promise.resolve()
+      })
       |> ignore
       None
     }, [setMargins])
@@ -158,6 +160,9 @@ module MarginPadding = {
       Fetch.fetchJson(`http://localhost:12346/styles/padding/exampleElementId`)
       |> Js.Promise.then_(paddingJson => {
         Js.Promise.resolve(setPadding(_ =>(Obj.magic(paddingJson))))
+      })
+      |> Js.Promise.catch(_ => {
+        Js.Promise.resolve()
       })
       |> ignore
       None
@@ -186,9 +191,9 @@ module MarginPadding = {
         />
         <select
           className="metric-select"
-          value={metric == Px ? "px" : "%"}
+          value={metric}
           onChange={e => {
-            let newMetric = ReactEvent.Form.target(e)["value"] == "px" ? Px : Percent
+            let newMetric = ReactEvent.Form.target(e)["value"] === "px" ? "px" : "%"
             updateDimension(setter, side, value, newMetric, if value !== "" {Changed} else {Default})
           }}>
           <option value="px"> {React.string("px")} </option>
